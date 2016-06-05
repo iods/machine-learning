@@ -1,6 +1,12 @@
+# ===================================================================
+#
+# A simple genetic algorithm that evolves the string Hello, World
+#
+# ===================================================================
+
 from random import ( randint, choice )
 
-TARGET = "Hello, World!"
+TARGET = "Hello, World"
 
 class Chromosome:
     def __init__(self, gene):
@@ -41,17 +47,18 @@ def random_chromosome(size):
     return Chromosome(''.join(result))
 
 class Population:
-    def __init__(self, size):
+    def __init__(self, size, elitism = 5):
         self.size = size
+        self.elitism = elitism
         self.members = Population.spawn(size, len(TARGET))
 
     def sorted_by_fitness(self):
         """ Return all members of the population sorted by fitness (cost function) """
         return list(sorted(self.members, key=lambda x: x.fitness()))
 
-    def kill_off(self):
-        """ Kill off the weakest two members of the population """
-        self.members = self.sorted_by_fitness()[:-2]
+    def select_fittest(self):
+        """ Select only the n fittest members of the population """
+        self.members = self.sorted_by_fitness()[:self.elitism]
 
     def add_member(self, member):
         self.members = self.members + [member]
@@ -60,7 +67,7 @@ class Population:
         spawn = []
         (first_parent, second_parent) = self.sorted_by_fitness()[0:2]
         (first_child, second_child) = first_parent.mate(second_parent)
-        self.kill_off() # kill the weakest members of population
+        self.select_fittest()
         self.add_member(first_child)
         self.add_member(second_child)
         self.add_member(first_child.mutate())
@@ -76,6 +83,8 @@ class Population:
         for i in range(n):
             population.append(random_chromosome(gene_size))
         return population
+
+# =============================================================================
 
 def run():
     population = Population(100)
